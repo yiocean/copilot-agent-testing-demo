@@ -1,0 +1,23 @@
+# Required dependencies for the data processing demo
+# Note: Some dependencies are optional and gracefully handled if missing
+
+# LDAP operations (optional - code works without it)
+python-ldap>=3.4.0
+
+# Database operations (optional - code works without it)
+pyodbc>=4.0.39
+
+# Core dependencies (included in Python standard library)
+# - json
+# - xml.etree.ElementTree
+# - re
+# - base64
+# - datetime
+# - os
+# - logging
+# - typing
+
+# Development dependencies (optional)
+# pytest>=7.0.0        # For running tests
+# black>=22.0.0         # For code formatting
+# flake8>=5.0.0         # For linting
