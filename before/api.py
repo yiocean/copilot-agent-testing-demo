@@ -11,15 +11,60 @@ import logging
 
 class API:
     def __init__(self):
-        self.ldap_server = "ldap://192.168.1.100:389"
-        self.ldap_user = "admin"
-        self.ldap_password = "Password123!"
-        self.sql_server = "DRIVER={ODBC Driver 17 for SQL Server};SERVER=192.168.1.200;DATABASE=ProductionDB;UID=sa;PWD=SqlAdmin2023!"
-        self.api_key = "key-1234567890abcdef"
-        self.secret_key = "supersecretkey123456"
-        self.encryption_key = "MyHardcodedEncryptionKey2023"
-        self.admin_password = "admin123"
-        self.backup_urls = ["http://backup1.internal.com", "http://backup2.internal.com"]
+        # Load sensitive information from environment variables
+        self.ldap_server = os.getenv('LDAP_SERVER', 'ldap://localhost:389')
+        self.ldap_user = os.getenv('LDAP_USER')
+        self.ldap_password = os.getenv('LDAP_PASSWORD')
+        
+        # Build SQL connection string from environment variables
+        self.sql_server = self._build_sql_connection_string()
+        
+        # Load API-related keys from environment variables
+        self.api_key = os.getenv('API_KEY')
+        self.secret_key = os.getenv('SECRET_KEY')
+        self.encryption_key = os.getenv('ENCRYPTION_KEY')
+        self.admin_password = os.getenv('ADMIN_PASSWORD')
+        
+        # Load backup URLs from environment variables
+        backup_urls = os.getenv('BACKUP_URLS')
+        self.backup_urls = backup_urls.split(',') if backup_urls else []
+        
+        # Validate required environment variables
+        self._validate_environment()
+
+    def _build_sql_connection_string(self):
+        """Build SQL Server connection string"""
+        return (
+            f"DRIVER={{ODBC Driver 17 for SQL Server}};"
+            f"SERVER={os.getenv('DB_SERVER', 'localhost')};"
+            f"DATABASE={os.getenv('DB_NAME', 'master')};"
+            f"UID={os.getenv('DB_USER')};"
+            f"PWD={os.getenv('DB_PASSWORD')}"
+        )
+
+    def _validate_environment(self):
+        """Validate that required environment variables are present"""
+        required_vars = [
+            ('LDAP_USER', 'LDAP username'),
+            ('LDAP_PASSWORD', 'LDAP password'),
+            ('DB_USER', 'Database username'),
+            ('DB_PASSWORD', 'Database password'),
+            ('API_KEY', 'API key'),
+            ('SECRET_KEY', 'Secret key'),
+            ('ENCRYPTION_KEY', 'Encryption key'),
+            ('ADMIN_PASSWORD', 'Admin password')
+        ]
+        
+        missing_vars = [
+            desc for var, desc in required_vars
+            if not os.getenv(var)
+        ]
+        
+        if missing_vars:
+            raise EnvironmentError(
+                "Missing required environment variables:\n" +
+                "\n".join(f"- {desc}" for desc in missing_vars)
+            )
         self.connection = None
         self.ldap_conn = None
         self.data = []
